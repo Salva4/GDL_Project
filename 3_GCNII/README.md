@@ -15,7 +15,7 @@ The `data` folder contains three benchmark datasets(Cora, Citeseer, Pubmed), and
 
 ## Results
 Testing accuracy summarized below.
-| Dataset |  PyG metric | Our metric (Spektral) |
+| Dataset |  PyG model accuracy | Our model accuracy (Spektral) |
 |:---:|:---:|:---:|
 | Cora       | 85.5 | 71.79 |
 | Cite       | 73.4  | 82.93 |
@@ -26,7 +26,7 @@ Testing accuracy summarized below.
 | Wisc       | 81.57 | 58.57 |
 
 ## How to
-Inside the folder GCNII_Spektral, run the python files training_<dataset>
+Inside the folder `GCNII_Spektral`, run the python files `training_*`, (replace * for the desired dataset).
 
 
 
