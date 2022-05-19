@@ -3,7 +3,7 @@ import numpy as np
 
 def obtain_edgesnodestarget(training):
   nodes_name = 'tr' if training else 'te'
-  path_ds = f'graph/nodes_{nodes_name}/'
+  path_ds = f'data/graph_{nodes_name}/'
 
   edges = np.loadtxt(path_ds + 'edges.dat')
   edges = np.array(edges, int) - int(not training)*32
