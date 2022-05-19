@@ -33,7 +33,7 @@ Testing accuracy summarized below.
 Inside the folder `GDL_Project/1_GCNII`, run the python files `training_*`, (replace * for the desired dataset).
 
 ## Output
-Inside the folder `output`, there is plotted the evolution of the validation accuracy vs. the goal accuracy (the one achieved by the original PyG implementation), for each dataset.
+Inside the folder `output`, there is plotted the evolution of the validation accuracy and the goal accuracy (the one achieved by the original PyG implementation), for each dataset.
 
 
 
