@@ -13,21 +13,8 @@ This repository contains a Spektral implementation of "Simple and Deep Graph Con
 - networkx 2.1
 - scikit-learn
 
-## Datasets
-
-The `data` folder contains three benchmark datasets (_Cora_, _Citeseer_, _Pubmed_), and the `newdata` folder contains four datasets (_Chameleon_, _Cornell_, _Texas_, _Wisconsin_) from [Geom-GCN](https://github.com/graphdml-uiuc-jlu/geom-gcn).
-
-## Results
-Testing accuracy summarized below.
-| Dataset |  PyG model accuracy | Our model accuracy (Spektral) |
-|:---:|:---:|:---:|
-| Cora       | 85.50 | 71.79 |
-| Cite       | 73.40 | 82.93 |
-| Pubm       | 80.30 | 79.48 |
-| Cham       | 62.48 | 20.03 |
-| Corn       | 76.49 | 87.98 |
-| Texa       | 77.84 | 68.85 |
-| Wisc       | 81.57 | 58.57 |
+## Datasets and results
+--> In the report
 
 ## How to
 Inside the folder `GDL_Project/1_GCNII`, run the python files `training_*`, (replace * for the desired dataset).
