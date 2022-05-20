@@ -4,6 +4,7 @@ import numpy as np
 from utils import *
 from model import *
 import matplotlib.pyplot as plt
+import scipy.sparse as sp
 
 import tensorflow as tf
 from tensorflow.keras.optimizers import Adam
@@ -88,7 +89,6 @@ labels = np.array(labels, dtype=int)
 labels = tf.one_hot(labels, max(labels)+1)
 
 n = features.shape[0]
-import scipy.sparse as sp
 adj = sp.csr_matrix(
   (
     np.ones((edges.shape[0],), int), 
