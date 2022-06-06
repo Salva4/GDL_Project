@@ -19,6 +19,9 @@ This repository contains a Spektral implementation of "Simple and Deep Graph Con
 ## How to
 Inside the folder `GDL_Project/1_GCNII`, run the python files `training_*`, (replace * for the desired dataset).
 
+## Results
+In the `results/Results.ipynb` file, there are the results on which the report is based. 
+
 ## Output
 Inside the folder `output`, there is plotted the evolution of the validation accuracy and the goal accuracy (the one achieved by the original PyG implementation), for each dataset.
 

@@ -5,36 +5,36 @@ from tensorflow.keras import Model
 from tensorflow.keras.layers import Dense, Dropout, Layer
 
 class GraphConvolution(Layer):
-
     def __init__(self, in_features, out_features, residual=False, variant=False):
         super(GraphConvolution, self).__init__() 
-        self.variant = variant
-        if self.variant:
-            self.in_features = 2*in_features 
-        else:
-            self.in_features = in_features
-
+        self.in_features = in_features
         self.out_features = out_features
         self.residual = residual
-        self.weight = np.zeros((self.in_features,self.out_features), float)
+        self.W = np.zeros((self.in_features,self.out_features), float)
         self.reset_parameters()
 
     def reset_parameters(self):
         stdv = 1. / math.sqrt(self.out_features)
-        self.weight = tf.random.uniform(self.weight.shape, -stdv, stdv)
+        self.W = tf.random.uniform(self.W.shape, -stdv, stdv)
 
-    def call(self, inp, adj , h0 , lamda, alpha, l):
-        theta = math.log(lamda/l+1)
-        hi = tf.cast(tf.sparse.to_dense(adj), float) @ inp
-        if self.variant:
-            support = np.concatenate([hi,h0], axis=1)
-            r = (1-alpha)*hi + alpha*h0
-        else:
-            support = (1-alpha)*hi + alpha*h0
-            r = support
-        output = theta*(support @ self.weight) + (1-theta)*r
-        if self.residual:
-            output = output + inp
+    def call(self, H, adj , H0 , lamda, alpha, l):
+        W = self.W
+        beta = math.log(lamda/l + 1)
+        A_hat = tf.cast(tf.sparse.to_dense(adj), float) + tf.eye(adj.shape[0])
+        D_hat_sqrtinv = tf.linalg.diag(tf.squeeze(1 / tf.sqrt(tf.reduce_sum(A_hat, 0))))
+        P = D_hat_sqrtinv @ A_hat @ D_hat_sqrtinv
+        
+        # Initial residual: a portion alpha of the input to each conv.layer will be H0,
+        #...which still preserves information on the graph structure
+        init_res = (1-alpha)*P@H + alpha*H0
+
+        # Identity mapping: as layers get deeper, the importance of the weights decreases 
+        #...to avoid the high number of interactions that, as the number of layers tends to 
+        #...infinity, undermine the preservation of the graph structure information
+        id_map = (1-beta)*tf.eye(W.shape[0]) + beta*W
+        
+        # H^(l+1) = ReLU((1-alpha)PH^(l) + alpha*H0) * ((1-beta)I + beta*W^(l)))
+        output = init_res @ id_map
         return output
 
 class GCNII(Model):
@@ -64,16 +64,52 @@ class GCNII(Model):
 
     def call(self, x):
         x, adj = x
-        _layers = []
+        conv_layers = []
         x = self.dropout(x, training=self.training)
-        layer_inner = self.fc1(x)
-        _layers.append(layer_inner)
-        for i, con in enumerate(self.convs):
-            layer_inner = self.dropout(layer_inner, training=self.training)
-            layer_inner = self.act_fn(con(layer_inner,adj,_layers[0],self.lamda,self.alpha,i+1))
-        layer_inner = self.dropout(layer_inner, training=self.training)
-        layer_inner = self.fc2(layer_inner)
-        return -tf.nn.log_softmax(layer_inner, axis=1)
+        H0 = self.fc1(x)
+        conv_layers.append(H0)
+        H = H0
+        for i, conv in enumerate(self.convs):
+            H = self.dropout(H, training=self.training)
+            H = self.act_fn(
+                conv(
+                    H, 
+                    adj,
+                    conv_layers[0],
+                    self.lamda,
+                    self.alpha,
+                    i+1
+                )
+            )
+        H = self.dropout(H, training=self.training)
+        output = self.fc2(H)
+        return -tf.nn.log_softmax(output, axis=1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

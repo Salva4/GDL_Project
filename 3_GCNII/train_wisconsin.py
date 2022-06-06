@@ -14,18 +14,20 @@ from tensorflow.keras.callbacks import EarlyStopping
 from spektral.data import Dataset, Graph
 from spektral.data.loaders import SingleLoader
 
+from tensorflow_addons.optimizers import AdamW
+
 ################ Settings
 SEED = 42
 EPOCHS = 1500
-LR = .1
-LAYER = 64
+LR = .01
+WEIGHT_DECAY = 5e-4
+LAYER = 16
 HIDDEN = 64
 DROPOUT = .6
 PATIENCE = 100
 NEW_DATA = 'wisconsin'
-DEV = 0
 ALPHA = .1
-LAMBDA = .5
+LAMBDA = 1
 VARIANT = False
 TEST = True
 GOAL = {
@@ -103,24 +105,6 @@ dataset = DS(
   labels=labels
 )
 
-model = GCNII(
-  nfeat=features.shape[1],
-  nlayers=LAYER,
-  nhidden=HIDDEN,
-  nclass=dataset[0].n_labels,
-  dropout=DROPOUT,
-  lamda = LAMBDA, 
-  alpha=ALPHA,
-  variant=VARIANT,
-  training=True
-)
- 
-model.compile(
-  optimizer=Adam(LR),
-  loss=CategoricalCrossentropy(reduction="sum"),
-  weighted_metrics=["acc"],
-)
-
 t_total = time.time()
 
 n = features.shape[0]
@@ -137,6 +121,24 @@ weights_te[idx_te] = 1.
 weights_tr /= np.sum(weights_tr)
 weights_va /= np.sum(weights_va)
 weights_te /= np.sum(weights_te)
+
+model = GCNII(
+  nfeat=features.shape[1],
+  nlayers=LAYER,
+  nhidden=HIDDEN,
+  nclass=dataset[0].n_labels,
+  dropout=DROPOUT,
+  lamda = LAMBDA, 
+  alpha=ALPHA,
+  variant=VARIANT,
+  training=True
+)
+
+model.compile(
+  optimizer=AdamW(learning_rate=LR, weight_decay=WEIGHT_DECAY),#Adam(LR),
+  loss=CategoricalCrossentropy(reduction="sum"),
+  weighted_metrics=["acc"],
+)
 
 loader_tr = SingleLoader(dataset, sample_weights=weights_tr)
 loader_va = SingleLoader(dataset, sample_weights=weights_va)
@@ -155,10 +157,12 @@ print("Training cost: {:.4f}s".format(time.time() - t_total))
 
 if TEST:
     print('\nEvaluating model:')
-    model.evaluate(
+    performance = model.evaluate(
       loader_te.load(),
       steps=loader_te.steps_per_epoch
     )
+    acc = performance[1]
+    print(f'acc {acc*100 : .2f}%')
 
 # Plot evolution of validation accuracy 
 plt.plot(history.history['val_acc'])
@@ -171,8 +175,6 @@ plt.ylim([0., 1.])
 plt.yticks([i/100 for i in range(0, 105, 10)])
 plt.grid(True)
 plt.savefig('output/fig_wisconsin.png')
-
-
 
 
 

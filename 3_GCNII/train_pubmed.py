@@ -13,18 +13,21 @@ from tensorflow.keras.callbacks import EarlyStopping
 from spektral.data import Dataset, Graph
 from spektral.data.loaders import SingleLoader
 
+from tensorflow_addons.optimizers import AdamW
+
 ################ Settings
 SEED = 42
 EPOCHS = 1500
 LR = .01
-LAYER = 64
-HIDDEN = 64
-DROPOUT = .6
+WEIGHT_DECAY = 5e-4
+LAYER = 16
+HIDDEN = 256
+DROPOUT = .5
 PATIENCE = 100
 DATA = 'pubmed'
 DEV = 0
 ALPHA = .1
-LAMBDA = .5
+LAMBDA = .4
 VARIANT = False
 TEST = True
 GOAL = {
@@ -91,7 +94,7 @@ model = GCNII(
 )
  
 model.compile(
-  optimizer=Adam(LR),
+  optimizer=AdamW(learning_rate=LR, weight_decay=WEIGHT_DECAY),#Adam(LR),
   loss=CategoricalCrossentropy(reduction="sum"),
   weighted_metrics=["acc"],
 )
